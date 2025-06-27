@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillStage.ai</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4285/4285611.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="./asset/style/index.css">
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-logo">
+      <img src="https://cdn-icons-png.flaticon.com/512/4285/4285611.png" alt="SkillStage Logo">
+      <span>SkillStage.ai</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Welcome to SkillStage.ai</h1>
+    <p>Practice real interviews with our AI avatars — Zoha & Sem</p>
+
+    <div>
+      <button class="btn" onclick="toggleForm('register')">Register</button>
+      <button class="btn" onclick="toggleForm('login')">Login</button>
+    </div>
+
+    <form class="form-group" id="registerForm">
+      <input type="text" placeholder="Full Name" required>
+      <input type="email" placeholder="Email Address" required>
+      <input type="password" placeholder="Create Password" required>
+      <button class="btn">Submit</button>
+    </form>
+
+    <form class="form-group" id="loginForm">
+      <input type="email" placeholder="Email Address" required>
+      <input type="password" placeholder="Password" required>
+      <button class="btn">Login</button>
+    </form>
+
+    <div class="social-icons" id="socialIcons">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Google">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Facebook">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" alt="GitHub">
+    </div>
+
+    <p class="footer-note">Get feedback, score out of 100, and level up your confidence.</p>
+  </div>
+
+  <script>
+    function toggleForm(type) {
+      const register = document.getElementById('registerForm');
+      const login = document.getElementById('loginForm');
+      const icons = document.getElementById('socialIcons');
+
+      if (type === 'register') {
+        register.classList.add('active');
+        login.classList.remove('active');
+        icons.classList.add('active');
+      } else {
+        login.classList.add('active');
+        register.classList.remove('active');
+        icons.classList.remove('active');
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SkillStage.ai – AI Resume Grader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+      --glass: rgba(30, 40, 60, 0.7);
+      --glow: 0 0 16px #00ffe7, 0 0 32px #00ffe7;
+      --accent: #00ffe7;
+      --danger: #ff3c6a;
+      --success: #00ffe7;
+      --card-bg: rgba(40, 60, 90, 0.8);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Poppins', Arial, sans-serif;
+      background: var(--main-bg);
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: repeating-linear-gradient(120deg, #00ffe733 0 2px, transparent 2px 40px),
+                  repeating-linear-gradient(60deg, #00ffe71a 0 2px, transparent 2px 40px);
+      animation: bgmove 10s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes bgmove {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: 200px 400px, 400px 200px; }
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+      gap: 2vw;
+      padding: 3vw 2vw;
+    }
+    .left-panel {
+      background: var(--glass);
+      box-shadow: var(--glow);
+      border-radius: 24px;
+      padding: 2vw 2vw 2vw 2vw;
+      min-width: 300px;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #00ffe755;
+      margin-top: 2vw;
+      margin-bottom: 2vw;
+    }
+    .left-panel h2 {
+      font-family: 'Orbitron', Arial, sans-serif;
+      color: var(--accent);
+      letter-spacing: 2px;
+      margin-bottom: 1.5vw;
+      text-shadow: 0 0 8px #00ffe7;
+    }
+    .upload-box {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5vw;
+      box-shadow: 0 0 8px #00ffe733;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2vw;
+      border: 1.5px solid #00ffe733;
+    }
+    .upload-box input[type=file] {
+      color: #fff;
+      margin-bottom: 1vw;
+    }
+    .upload-box label {
+      color: #fff;
+      margin-bottom: 0.5vw;
+      font-size: 1.1em;
+    }
+    .upload-box button {
+      background: var(--accent);
+      color: #222;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7em 1.5em;
+      font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ffe7;
+      transition: background 0.2s;
+    }
+    .upload-box button:hover {
+      background: #00bfae;
+    }
+    .score-meter {
+      margin-top: 2vw;
+      width: 180px;
+      height: 100px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .meter-bg {
+      width: 100%;
+      height: 100%;
+      border-radius: 100px 100px 0 0;
+      background: linear-gradient(90deg, #ff3c6a 0%, #00ffe7 100%);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      opacity: 0.15;
+    }
+    .needle {
+      width: 6px;
+      height: 90px;
+      background: linear-gradient(180deg, #fff 0%, var(--accent) 100%);
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%) rotate(-60deg);
+      transform-origin: bottom center;
+      border-radius: 3px;
+      box-shadow: 0 0 8px #00ffe7;
+      transition: transform 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    .score-label {
+      position: absolute;
+      left: 50%;
+      bottom: -2.5em;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 1.5em;
+      font-family: 'Orbitron', Arial, sans-serif;
+      text-shadow: 0 0 8px #00ffe7;
+      letter-spacing: 1px;
+    }
+    .center-panel {
+      flex: 1 1 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-width: 320px;
+      max-width: 500px;
+    }
+    .resume-preview {
+      width: 320px;
+      height: 420px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 18px;
+      box-shadow: 0 0 32px #00ffe733, 0 8px 32px #000a;
+      margin-bottom: -60px;
+      margin-top: 40px;
+      border: 1.5px solid #00ffe733;
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1em;
+      color: #fff;
+      font-family: 'Poppins', Arial, sans-serif;
+      text-align: center;
+      padding: 1.5em;
+      backdrop-filter: blur(4px);
+      transition: box-shadow 0.4s;
+    }
+    .result-screen {
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,255,231,0.12);
+      border-radius: 18px;
+      box-shadow: 0 0 32px #00ffe7cc;
+      padding: 2em 2.5em;
+      min-width: 260px;
+      z-index: 3;
+      text-align: center;
+      border: 1.5px solid #00ffe7;
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-family: 'Orbitron', Arial, sans-serif;
+      font-size: 1.3em;
+      animation: floatIn 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translate(-50%, 30%); }
+      100% { opacity: 1; transform: translate(-50%, -50%);}
+    }
+    .right-panel {
+      background: var(--glass);
+      box-shadow: var(--glow);
+      border-radius: 24px;
+      padding: 2vw 2vw 2vw 2vw;
+      min-width: 300px;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      backdrop-filter: blur(8px);
+      border: 1.5px solid #00ffe755;
+      margin-top: 2vw;
+      margin-bottom: 2vw;
+    }
+    .scorecard {
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 0 8px #00ffe733;
+      padding: 1.5vw;
+      margin-bottom: 2vw;
+      border: 1.5px solid #00ffe733;
+      color: #fff;
+    }
+    .scorecard h3 {
+      color: var(--accent);
+      font-family: 'Orbitron', Arial, sans-serif;
+      margin-bottom: 0.5em;
+      text-shadow: 0 0 8px #00ffe7;
+    }
+    .scorecard .score {
+      font-size: 2.2em;
+      font-family: 'Orbitron', Arial, sans-serif;
+      color: var(--accent);
+      margin-bottom: 0.2em;
+      text-shadow: 0 0 8px #00ffe7;
+    }
+    .scorecard .not-shortlisted {
+      color: var(--danger);
+      font-weight: bold;
+      margin-top: 1em;
+      font-size: 1.2em;
+      text-shadow: 0 0 8px #ff3c6a;
+    }
+    .scorecard .shortlisted {
+      color: var(--success);
+      font-weight: bold;
+      margin-top: 1em;
+      font-size: 1.2em;
+      text-shadow: 0 0 8px #00ffe7;
+    }
+    .scorecard ul {
+      margin: 0.5em 0 0 1.2em;
+      padding: 0;
+      font-size: 1em;
+    }
+    .avatars {
+      display: flex;
+      gap: 1em;
+      margin-top: 1.5em;
+      justify-content: center;
+      align-items: center;
+    }
+    .avatar-card {
+      background: rgba(0,255,231,0.12);
+      border: 1.5px solid #00ffe7;
+      border-radius: 16px;
+      box-shadow: 0 0 16px #00ffe7cc;
+      padding: 1em 0.7em 0.5em 0.7em;
+      text-align: center;
+      width: 80px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .avatar-card.selected, .avatar-card:hover {
+      transform: scale(1.08) translateY(-6px);
+      box-shadow: 0 0 32px #00ffe7;
+      background: rgba(0,255,231,0.22);
+    }
+    .avatar-card img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-bottom: 0.3em;
+      border: 2px solid #00ffe7;
+      box-shadow: 0 0 8px #00ffe7;
+    }
+    .avatar-card span {
+      display: block;
+      color: #fff;
+      font-size: 1em;
+      margin-top: 0.2em;
+      font-family: 'Orbitron', Arial, sans-serif;
+    }
+    @media (max-width: 1100px) {
+      .container { flex-direction: column; align-items: stretch; }
+      .left-panel, .right-panel { max-width: 100%; min-width: 0; margin: 1vw 0; }
+      .center-panel { max-width: 100%; }
+    }
+    @media (max-width: 700px) {
+      .container { flex-direction: column; padding: 2vw 1vw; }
+      .resume-preview { width: 95vw; height: 220px; font-size: 0.95em; }
+      .center-panel { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <h2>Resume Grader</h2>
+      <div class="upload-box">
+        <label for="resumeInput">Upload Resume (PDF/DOCX)</label>
+        <input type="file" id="resumeInput" accept=".pdf,.docx,.txt">
+        <button id="uploadBtn">Analyze</button>
+      </div>
+      <div class="score-meter">
+        <div class="meter-bg"></div>
+        <div class="needle" id="needle"></div>
+        <div class="score-label" id="scoreLabel">0/100</div>
+      </div>
+    </div>
+    <!-- Center Panel -->
+    <div class="center-panel">
+      <div class="resume-preview" id="resumePreview">
+        <span style="opacity:0.5;">Resume preview will appear here...</span>
+      </div>
+      <div class="result-screen" id="resultScreen" style="display:none;"></div>
+    </div>
+    <!-- Right Panel -->
+    <div class="right-panel">
+      <div class="scorecard" id="scoreCard">
+        <h3>Scorecard</h3>
+        <div class="score" id="scoreValue">0/100</div>
+        <div>Issues: <span id="issueCount">0</span></div>
+        <ul id="suggestionsList"></ul>
+        <div class="not-shortlisted" id="notShortlisted">Not Shortlisted</div>
+        <div class="shortlisted" id="shortlisted" style="display:none;">Shortlisted!</div>
+        <div class="avatars" id="avatars" style="display:none;">
+          <div class="avatar-card" data-avatar="zoha">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Zoha">
+            <span>Zoha</span>
+          </div>
+          <div class="avatar-card" data-avatar="sem">
+            <img src="https://randomuser.me/api/portraits/men/46.jpg" alt="Sem">
+            <span>Sem</span>
+          </div>
+          <div class="avatar-card" data-avatar="both">
+            <img src="https://cdn-icons-png.flaticon.com/512/4285/4285611.png" alt="Both" style="background:#fff;">
+            <span>Both</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Simulated ATS logic
+    const suggestionsArr = [
+      "Missing quantifiable achievements",
+      "Improve formatting for readability",
+      "Add more technical skills",
+      "Grammar issues detected",
+      "No summary section found",
+      "Lacks action verbs",
+      "No links to portfolio or LinkedIn",
+      "Education section incomplete",
+      "No certifications listed",
+      "No contact information"
+    ];
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function randomSample(arr, n) {
+      let result = [];
+      let taken = new Set();
+      while (result.length < n && result.length < arr.length) {
+        let idx = getRandomInt(0, arr.length - 1);
+        if (!taken.has(idx)) {
+          result.push(arr[idx]);
+          taken.add(idx);
+        }
+      }
+      return result;
+    }
+    // UI Elements
+    const uploadBtn = document.getElementById('uploadBtn');
+    const resumeInput = document.getElementById('resumeInput');
+    const resumePreview = document.getElementById('resumePreview');
+    const needle = document.getElementById('needle');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const scoreValue = document.getElementById('scoreValue');
+    const issueCount = document.getElementById('issueCount');
+    const suggestionsList = document.getElementById('suggestionsList');
+    const notShortlisted = document.getElementById('notShortlisted');
+    const shortlisted = document.getElementById('shortlisted');
+    const avatars = document.getElementById('avatars');
+    const resultScreen = document.getElementById('resultScreen');
+
+    // Handle file upload and simulate scoring
+    uploadBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const file = resumeInput.files[0];
+      if (!file) {
+        alert('Please select a resume file.');
+        return;
+      }
+      // Simulate reading file and preview
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        let text = evt.target.result;
+        if (file.type === 'application/pdf') {
+          text = '[PDF Preview Unavailable in Browser]';
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          text = '[DOCX Preview Unavailable in Browser]';
+        } else {
+          text = text.substring(0, 800) + (text.length > 800 ? '...' : '');
+        }
+        resumePreview.innerText = text;
+      };
+      if (file.type.startsWith('text/')) {
+        reader.readAsText(file);
+      } else {
+        resumePreview.innerText = '[Preview not available for this file type]';
+      }
+      // Simulate ATS scoring
+      const score = getRandomInt(20, 98);
+      const issues = getRandomInt(1, 4);
+      const suggestions = randomSample(suggestionsArr, issues);
+      // Animate needle
+      const angle = -60 + (score / 100) * 120;
+      needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+      // Animate score label
+      let currentScore = 0;
+      scoreLabel.innerText = '0/100';
+      scoreValue.innerText = '0/100';
+      shortlisted.style.display = 'none';
+      avatars.style.display = 'none';
+      notShortlisted.style.display = 'block';
+      resultScreen.style.display = 'none';
+      suggestionsList.innerHTML = '';
+      issueCount.innerText = issues;
+      let interval = setInterval(() => {
+        if (currentScore < score) {
+          currentScore++;
+          scoreLabel.innerText = `${currentScore}/100`;
+          scoreValue.innerText = `${currentScore}/100`;
+        } else {
+          clearInterval(interval);
+        }
+      }, 10);
+      // Show suggestions
+      suggestions.forEach(s => {
+        const li = document.createElement('li');
+        li.innerText = s;
+        suggestionsList.appendChild(li);
+      });
+      // Show result screen
+      setTimeout(() => {
+        resultScreen.style.display = 'block';
+        if (score < 75) {
+          resultScreen.innerHTML = `<span style='color:var(--danger);font-size:1.5em;'>Not Shortlisted</span><br><span style='font-size:1.1em;'>Score: ${score}/100</span>`;
+        } else {
+          resultScreen.innerHTML = `<span style='color:var(--success);font-size:1.5em;'>Shortlisted!</span><br><span style='font-size:1.1em;'>Score: ${score}/100</span>`;
+        }
+      }, 1200);
+      // Show avatars if shortlisted
+      if (score >= 75) {
+        shortlisted.style.display = 'block';
+        notShortlisted.style.display = 'none';
+        avatars.style.display = 'flex';
+      }
+    });
+    // Avatar card selection
+    document.querySelectorAll('.avatar-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      });
+    });
+  </script>
+</body>
+</html>
