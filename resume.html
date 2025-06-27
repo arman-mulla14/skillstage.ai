@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --main-bg: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+      --main-bg: linear-gradient(135deg, #232d3f 0%, #0f2027 100%);
       --glass: rgba(30, 40, 60, 0.7);
       --glow: 0 0 16px #00ffe7, 0 0 32px #00ffe7;
       --accent: #00ffe7;
@@ -22,20 +22,6 @@
       background: var(--main-bg);
       overflow-x: hidden;
       position: relative;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background: repeating-linear-gradient(120deg, #00ffe733 0 2px, transparent 2px 40px),
-                  repeating-linear-gradient(60deg, #00ffe71a 0 2px, transparent 2px 40px);
-      animation: bgmove 10s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes bgmove {
-      0% { background-position: 0 0, 0 0; }
-      100% { background-position: 200px 400px, 400px 200px; }
     }
     .container {
       display: flex;
@@ -314,6 +300,7 @@
   </style>
 </head>
 <body>
+  <div id="common-header"></div>
   <div class="container">
     <!-- Left Panel -->
     <div class="left-panel">
@@ -360,6 +347,11 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div id="common-footer">
+    <div class="footer">
+      <p>&copy; 2024 SkillStage.ai &mdash; All rights reserved.</p>
     </div>
   </div>
   <script>
@@ -486,6 +478,13 @@
         card.classList.add('selected');
       });
     });
+  </script>
+  <script>
+    function loadCommon(file, elementId) {
+      fetch(file)
+        .then(res => res.text())
+        .then(html => { document.getElementById(elementId).innerHTML = html; });
+    }
   </script>
 </body>
 </html>
